@@ -1,0 +1,31 @@
+service: notification-service
+
+plugins:
+  - serverless-esbuild
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  stage: ${opt:stage, 'dev'}
+  region: sa-east-1
+  iam:
+    role:
+      statements:
+        - ${file(iam/SendEmailIAM.yml):SendEmailIAM}
+
+functions:
+  sendEmail:
+    handler: src/handlers/http/sendEmail.handler
+
+custom:
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap: true
+    exclude:
+      - aws-sdk
+    target: node16
+    define:
+      require.resolver: undefined
+    platform: node
+    concurrency: 10
